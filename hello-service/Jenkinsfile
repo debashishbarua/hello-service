@@ -13,15 +13,14 @@ pipeline {
 		dir('hello-service'){
       		bat 'mvn clean package'      
    		}        
-      }
-   }
-   }
+     }
+   }   
    stage('Docker Build') {
            steps {
                 script {
                     docker.build("debashishbarua/hello-service:${TAG}")
                  }
-          }      
+   			}      
    }  
    stage('Pushing Docker Image to Dockerhub') {
             steps {
@@ -30,7 +29,7 @@ pipeline {
                         docker.image("debashishbarua/hello-service:${TAG}").push()
                         docker.image("debashishbarua/hello-service:${TAG}").push("latest")
                     }
-                }
+                
             }
    }
    stage('Deploy'){
@@ -39,5 +38,6 @@ pipeline {
                 bat 'docker rm hello-world | true'
 				bat 'docker run --name hello-service -d -p 9090:9090 debashishbarua/hello-service:${TAG}'            }
         }
-    
+    }
  }
+}

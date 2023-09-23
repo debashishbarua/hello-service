@@ -17,9 +17,8 @@ pipeline {
    }   
    stage('Docker Build') {
            steps {
-                script {
-                    docker.build("debashishbarua/hello-service:${TAG}")
-                 }
+                  docker.build("debashishbarua/hello-service:${TAG}")
+                 
    			}      
    }  
    stage('Pushing Docker Image to Dockerhub') {

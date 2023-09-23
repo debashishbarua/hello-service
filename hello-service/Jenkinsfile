@@ -23,8 +23,7 @@ pipeline {
 				   }
                  
    			}      
-   }  
-   stage('Pushing Docker Image to Dockerhub') {
+    
             steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', 'docker_credential') {
@@ -33,13 +32,13 @@ pipeline {
                     }
                 
             }
-   }
-   stage('Deploy'){
+   
+  
             steps {
                 bat 'docker stop hello-world | true'
                 bat 'docker rm hello-world | true'
 				bat 'docker run --name hello-service -d -p 9090:9090 debashishbarua/hello-service:${TAG}'            }
         }
-    }
- }
+    
+     }}
 }

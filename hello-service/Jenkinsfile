@@ -1,44 +1,37 @@
 pipeline {
-  agent any
-  tools {
-    maven 'M3' 
-  }
-  environment {
-    DATE = new Date().format('yy.M')
-    TAG = "${DATE}.${BUILD_NUMBER}"
-  }
-  stages {
-   stage ('Build') {
-     steps {
-		dir('hello-service'){
-      		bat 'mvn clean package'      
-   		}        
-     }
-   }   
-   stage('Docker Build') {
-           steps {
-                  
-                  script {
-					docker.build("debashishbarua/hello-service:${TAG}")
-				   }
-                 
-   			}      
-    
-            steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker_credential') {
-                        docker.image("debashishbarua/hello-service:${TAG}").push()
-                        docker.image("debashishbarua/hello-service:${TAG}").push("latest")
-                    }
-                
+    agent any
+    tools{
+        maven 'M3'
+    }
+    stages{
+        stage('Build Maven'){
+            steps{
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/debashishbarua/hello-service.git']]])
+                dir('hello-service'){
+      	            bat 'mvn clean package'      
+   		        } 
             }
-   
-  
-            steps {
-                bat 'docker stop hello-world | true'
-                bat 'docker rm hello-world | true'
-				bat 'docker run --name hello-service -d -p 9090:9090 debashishbarua/hello-service:${TAG}'            }
         }
-    
-     }}
+        stage('Build docker image'){
+            steps{
+                script{
+                    dir('hello-service'){
+                        bat 'docker build -t debashishbarua/devops-integration .'
+                    }
+                }
+            }
+        }
+        stage('Push image to Hub'){
+            steps{
+                script{
+                    dir('hello-service'){
+                        withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd')]) {
+                        bat 'docker login -u debashishbarua -p Spring30@2pi' }
+                        bat 'docker push debashishbarua/devops-integration'
+                    }
+                   
+                }
+            }
+        }
+    }
 }

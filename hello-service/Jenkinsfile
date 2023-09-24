@@ -26,8 +26,9 @@ pipeline {
                 script{
                     dir('hello-service'){
                         withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd')]) {
-                        bat 'docker login -u debashishbarua -p Spring30@2pi' }
+                        bat 'docker login -u debashishbarua -p %dockerhubpwd%'
                         bat 'docker push debashishbarua/devops-integration'
+                        }
                     }
                    
                 }
